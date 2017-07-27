@@ -13,21 +13,36 @@ The WHMCS server cron function will ping the iRedMail-Pro domain to parse the nu
 ### Administrator
 #### WHMCS Account Creation
 1. Check if the account exists. `iRedMail:GET /api/admin/<mail>`
-    1) If it does exist, update it with zero alotted domains and zero total storage. `iRedMail:PUT /api/admin/<mail>?password=$WHMCS_USER_PASS&maxDomains=0`
-    2) Get a list of domains assigned to administrator. `NOT YET IMPLEMENTED`
-    3) Update WHMCS user alotted domains with product list through internal api. (This action will branch to the WHMCS Server Product Purchase function tree. The purpose of this flow is to allow for existing domains to be imported into WHMCS billing.)
-        1] Get a list of products assigned to the module. `WHMCS:https://developers.whmcs.com/api-reference/getproducts/ POST:api.php?action='GetProducts'&module='WHMCS-iRedMail-Pro'`
-            1} If no products are created, initialize. 
-        2] Select default domain pricing setting.
-        3] Use 2) to determine the number of products to add.
-        4] 
-        
+  1) If it does exist, update it with zero alotted domains and zero total storage. `iRedMail:PUT /api/admin/<mail>?password=$WHMCS_USER_PASS&maxDomains=0`
+  2) Get a list of domains assigned to administrator. `NOT YET IMPLEMENTED`
+  3) Update WHMCS user alotted domains with product list through internal api. (This action will branch to the WHMCS Server Product Purchase function tree. The purpose of this flow is to allow for existing domains to be imported into WHMCS billing.)
+   1] Get a list of products assigned to the module. `WHMCS:https://developers.whmcs.com/api-reference/getproducts/ POST:api.php?action='GetProducts'&module='WHMCS-iRedMail-Pro'`
+    1} If no products are created, initialize.
+    ```
+    WHMCS:https://developers.whmcs.com/api-reference/addproduct/
+    POST:api.php?
+    action='AddProduct'&
+    name='Default iRedMail Domain Product'&
+    type='server'&
+    paytype='free'&
+    description='Initialized product for the WHMCS-iRedMail-Pro addon. Users are charged through WHMCS server status crons at $5 a user.'&
+    module='WHMCS-iRedMail-Pro'
+    ```
+   2] Select first returned product.
+   3] Use 2) to determine the number of products to add.
+   4] Add products to an order assigned to the new user.
 2. If it doesn't exist, create it with zero alotted domains and zero total storage.
 
 #### WHMCS Account Update
+1. Through a WHMCS hook watching for accountUpdates, pass the new password through to iRedMail API using the same <mail> as the email of the WHMCS user.
 
+#### WHMCS Account Suspension
+1. For the sake of the end-users, only pass the API to disable/re-enable iRedMail admin.
 
 #### WHMCS Account Deletion
+1. Get iRedMail-Pro assigned domains for the iRedMail administrator.
+2. Delete each domain.
+3. Delete iRedMail-Pro Administrator.
 
 
 ### Domain
