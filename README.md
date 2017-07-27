@@ -73,4 +73,11 @@ SuspendAccount: `iRedMail:PUT /api/admin/<mail>?accountStatus=disabled`
 
 
 ### Cron
-#### WHMCS Cron Run
+#### WHMCS Cron Run https://developers.whmcs.com/provisioning-modules/supported-functions/ UsageUpdate()
+1. Get a list of products based off WHMCS module.
+2. Get a list of users based off list of active products.
+3. Get a list of iRedMail admins based off list of users.
+4. Get a list of domains based off list of iRedMail admins.
+5. Assign list of domains to respective WHMCS users.
+6. Make an API call for each domain and create billable objects for each domain based off the number of users and quota used from the API response per cron cycle.
+7. For each user, compile the billable objects from their respective domains and use internal WHMCS API AddBillableItem.
