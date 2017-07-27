@@ -15,7 +15,7 @@ The WHMCS server status cron function will ping the iRedMail-Pro domain to parse
 1. Check if the account exists. `iRedMail:GET /api/admin/<mail>`
     * If it does exist, update it with zero alotted domains and zero total storage. `iRedMail:PUT /api/admin/<mail>?password=$WHMCS_USER_PASS&maxDomains=0`
     * Get a list of domains assigned to administrator. `NOT YET IMPLEMENTED`
-    * Update WHMCS user alotted domains with product list through internal api. (This action will branch to the WHMCS Server Product Purchase function tree. The purpose of this flow is to allow for existing domains to be imported into WHMCS billing.)
+    * Update WHMCS user allotted domains with product list through internal api. (This action will branch to the WHMCS Server Product Purchase function tree. The purpose of this flow is to allow for existing domains to be imported into WHMCS billing.)
         * Get a list of products assigned to the module. `WHMCS:https://developers.whmcs.com/api-reference/getproducts/ POST:api.php?action='GetProducts'&module='WHMCS-iRedMailPro'`
         * If no products are created, initialize.
         ```
@@ -31,7 +31,7 @@ The WHMCS server status cron function will ping the iRedMail-Pro domain to parse
     * Select first returned product.
     * Use list of domains to determine the number of products to add.
     * Add products to an order assigned to the new user.
-2. If it doesn't exist, create it with zero alotted domains and zero total storage.
+2. If it doesn't exist, create it with zero allotted domains and zero total storage.
 
 #### WHMCS Account Update
 1. Through a WHMCS hook watching for accountUpdates, pass the new password through to iRedMail API using the same <mail> as the email of the WHMCS user.
