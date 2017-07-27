@@ -5,9 +5,9 @@ Tested on WHMCS 7.2.3-release.1, PHP7, and iRedMail-Pro v2.7.0 (MySQL)
 Being incredibly difficult to break into self-hosting markets, the goal of this plugin is to enable developers, small business owners, and freelancers to take advantage of the powerhouses that are WHMCS and iRedMail-Pro.
 
 ## Design
-Based on the iRedMail Pro design, that an administrative account exists that is responsible for multiple domains, the plugin will use WHMCS hooks to create an iRedMail administrator on WHMCS account creation and/or update. Whenever the password is changed in WHMCS, it will push the password to iRedMail via API.
-Purchase of a product in WHMCS will raise the iRedMail administrator's domain capacity by +1. The domain can be billed as a separate object from users including total domain storage space.
-The WHMCS server cron function will ping the iRedMail-Pro domain to parse the number of users and then utilize the WHMCS api to invoice an amount per user per hour as well as total domain storage per hour.
+Based on the iRedMail-Pro design, that an administrative account exists that is responsible for multiple domains, the plugin will use WHMCS module hooks to create/update/delete an iRedMail administrator on WHMCS account create/update/delete. Whenever the password is changed in WHMCS, it will push the password to iRedMail via API.
+Purchase of a product in WHMCS will raise the iRedMail administrator's domain capacity by one. The domain can be billed as a separate object from users including total domain storage space.
+The WHMCS server status cron function will ping the iRedMail-Pro domain to parse the number of users and then utilize the WHMCS api to invoice an amount per user per hour as well as total domain storage per hour.
 
 ## Action Flow
 ### Administrator
