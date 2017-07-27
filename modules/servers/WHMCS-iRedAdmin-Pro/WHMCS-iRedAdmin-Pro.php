@@ -13,26 +13,26 @@
    See the License for the specific language governing permissions and
    limitations under the License.*/
    
-function WHMCS-iRedMailPro_CreateAccount() {
+function WHMCS-iRedAdmin-Pro_CreateAccount() {
     
 }
 
-function WHMCS-iRedMailPro_SuspendAccount() {
+function WHMCS-iRedAdmin-Pro_SuspendAccount() {
     
 }
 
-function WHMCS-iRedMailPro_UnsuspendAccount() {
+function WHMCS-iRedAdmin-Pro_UnsuspendAccount() {
     
 }
 
-function WHMCS-iRedMailPro_TerminateAccount() {
+function WHMCS-iRedAdmin-Pro_TerminateAccount() {
     
 }
 
-function WHMCS-iRedMailPro_ChangePassword() {
+function WHMCS-iRedAdmin-Pro_ChangePassword() {
     
 }
 
-function WHMCS-iRedMailPro_UsageUpdate() {
+function WHMCS-iRedAdmin-Pro_UsageUpdate() {
     
 }
