@@ -16,7 +16,7 @@ The WHMCS server status cron function will ping the iRedMail-Pro domain to parse
     * If it does exist, update it with zero alotted domains and zero total storage. `iRedMail:PUT /api/admin/<mail>?password=$WHMCS_USER_PASS&maxDomains=0`
     * Get a list of domains assigned to administrator. `NOT YET IMPLEMENTED`
     * Update WHMCS user alotted domains with product list through internal api. (This action will branch to the WHMCS Server Product Purchase function tree. The purpose of this flow is to allow for existing domains to be imported into WHMCS billing.)
-        * Get a list of products assigned to the module. `WHMCS:https://developers.whmcs.com/api-reference/getproducts/ POST:api.php?action='GetProducts'&module='WHMCS-iRedMail-Pro'`
+        * Get a list of products assigned to the module. `WHMCS:https://developers.whmcs.com/api-reference/getproducts/ POST:api.php?action='GetProducts'&module='WHMCS-iRedMailPro'`
         * If no products are created, initialize.
         ```
         WHMCS:https://developers.whmcs.com/api-reference/addproduct/
@@ -26,7 +26,7 @@ The WHMCS server status cron function will ping the iRedMail-Pro domain to parse
         type='server'&
         paytype='free'&
         description='Initialized product for the WHMCS-iRedMail-Pro addon. Users are charged through WHMCS server status crons at $5 a user.'&
-        module='WHMCS-iRedMail-Pro'
+        module='WHMCS-iRedMailPro'
         ```
     * Select first returned product.
     * Use list of domains to determine the number of products to add.
