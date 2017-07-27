@@ -11,7 +11,8 @@ The WHMCS server status cron function will ping the iRedMail-Pro domain to parse
 
 ## Action Flow
 ### Administrator
-#### WHMCS Account Creation
+#### WHMCS Account Creation (handled through core module function) https://developers.whmcs.com/provisioning-modules/core-module-functions/ CreateAccount()
+    
 1. Check if the account exists. `iRedMail:GET /api/admin/<mail>`
     * If it does exist, update it with zero alotted domains and zero total storage. `iRedMail:PUT /api/admin/<mail>?password=$WHMCS_USER_PASS&maxDomains=0`
     * Get a list of domains assigned to administrator. `NOT YET IMPLEMENTED`
@@ -28,21 +29,39 @@ The WHMCS server status cron function will ping the iRedMail-Pro domain to parse
         description='Initialized product for the WHMCS-iRedMail-Pro addon. Users are charged through WHMCS server status crons at $5 a user.'&
         module='WHMCS-iRedMailPro'
         ```
-    * Select first returned product.
+    * Select first returned product and grab the PID to pass to addOrder.
     * Use list of domains to determine the number of products to add.
-    * Add products to an order assigned to the new user.
-2. If it doesn't exist, create it with zero allotted domains and zero total storage.
+    * Add products to the new user.
+    ```
+    WHMCS:https://developers.whmcs.com/api-reference/addorder/
+    POST:api.php?
+    action='AddOrder'&
+    clientid=WHMCS_USER_ID&
+    paymentmethod=mailin&
+    pid[0]=WHMCS_MODULE_PRODUCTDEFAULT
+    ```
+    
+2. If the admin account doesn't exist, create it with zero allotted domains and zero total storage.
+```
+iRedMail:POST /api/admin/<mail>?
+name='WHMCS_USER_NAME'&
+password='WHMCS_USER_PASS'&
+maxDomains=0
+```
 
-#### WHMCS Account Update
+#### WHMCS Account Update (handled through core module function) https://developers.whmcs.com/provisioning-modules/core-module-functions/ ChangePassword()
 1. Through a WHMCS hook watching for accountUpdates, pass the new password through to iRedMail API using the same <mail> as the email of the WHMCS user.
+`iRedMail:PUT /api/admin/<mail>?password=WHMCS_USER_PASS`
 
-#### WHMCS Account Suspension
+#### WHMCS Account Suspension (handled through core module function) https://developers.whmcs.com/provisioning-modules/core-module-functions/ SuspendAccount()/UnsuspendAccount()
 1. For the sake of the end-users, only pass the API to disable/re-enable iRedMail admin.
+UnuspendAccount: `iRedMail:PUT /api/admin/<mail>?accountStatus=active`
+SuspendAccount: `iRedMail:PUT /api/admin/<mail>?accountStatus=disabled`
 
-#### WHMCS Account Deletion
-1. Get iRedMail-Pro assigned domains for the iRedMail administrator.
-2. Delete each domain.
-3. Delete iRedMail-Pro Administrator.
+#### WHMCS Account Deletion (handled through core module function) https://developers.whmcs.com/provisioning-modules/core-module-functions/ TerminateAccount()
+1. Get iRedMail-Pro assigned domains for the iRedMail administrator. `NOT YET IMPLEMENTED`
+2. Delete each domain. `iRedAdmin:DELETE /api/domain/<domain>`
+3. Delete iRedMail-Pro Administrator. `iRedAdmin:DELETE /api/admin/<mail>`
 
 
 ### Domain
