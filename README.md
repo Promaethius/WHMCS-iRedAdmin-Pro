@@ -74,10 +74,42 @@ SuspendAccount: `iRedAdmin:PUT /api/admin/<mail>?accountStatus=disabled`
 
 ### Cron
 #### WHMCS Cron Run https://developers.whmcs.com/provisioning-modules/supported-functions/ UsageUpdate()
-1. Get a list of products based off WHMCS module.
-2. Get a list of users based off list of active products.
-3. Get a list of iRedAdmin admins based off list of users.
-4. Get a list of domains based off list of iRedAdmin admins.
-5. Assign list of domains to respective WHMCS users.
-6. Make an API call for each domain and create billable objects for each domain based off the number of users and quota used from the API response per cron cycle.
-7. For each user, compile the billable objects from their respective domains and use internal WHMCS API AddBillableItem.
+1. Get a list of products based off WHMCS module. `WHMCS:https://developers.whmcs.com/api-reference/getproducts/ POST:api.php?action='GetProducts'&module='WHMCS-iRedAdminPro'`
+2. Get a list of active orders based off product list. `WHMCS:https://developers.whmcs.com/api-reference/getorders/ POST:api.php?action='GetOrders'&limitnum=0&status='Active'`
+    * The returned JSON document needs to be sorted by the lineitems array returned.
+    * `"orders[order][0][lineitems][lineitem][0][product]": WHMCS_MODULE_PRODUCT`
+3. Get a list of users based off list of active orders.
+    * Parsed and sorted JSON document that includes active module products.
+    * User ID contained in `"orders[order][0][userid]"`
+    * `WHMCS:https://developers.whmcs.com/api-reference/getclientsdetails/ POST:api.php?action='GetClientsDetails'&clientid=CLIENT_ID`
+    * Use returned `"client[email]"` field to compile a list of active iRedAdmin-Pro users.
+4. Get a list of iRedAdmin admins based off list of users. `iRedAdmin:GET /api/admin/<mail>`
+    * Only looking for existing iRedAdmin-Pro administrators with '_result:success'
+5. Get a list of domains based off list of iRedAdmin admins. `NOT YET IMPLEMENTED`
+6. Assign list of domains to respective WHMCS users.
+7. Make an API call for each domain and create billable objects for each domain based off the number of users and quota used from the API response per cron cycle. `iRedAdmin:GET /api/domain/<domain>`
+8. For each user, compile the billable objects from their respective domains and use internal WHMCS API AddBillableItem. 
+    * ``` iRedAdmin:GET /api/domain/<domain>
+    "_data":"mailboxcount":USER_COUNT
+    ```
+    * ```
+    WHMCS:https://developers.whmcs.com/api-reference/addbillableitem/
+    POST:api.php?action='AddBillableItem'&
+    clientid=CLIENT_ID&
+    description='User cost for 'DOMAIN' for 'USER_COUNT&
+    amount=USER_COUNT*COST&
+    invoiceaction='nextinvoice'
+    ```
+    * The logic behind this cron cycle is that it is performed once per 24 hours, that each user will have an ondemand cost for 24 hours, and that the composite will be charged the next time the user is invoiced for the initial domain order.
+9. Similar in philosophy to the user billing section, charge an ondemand price for the amount that the domain administrator in iRedAdmin-Pro has assigned to each domain.
+    * ``` iRedAdmin:GET /api/domain/<domain>
+    "_data":"quota":USER_QUOTA
+    ```
+    * ```
+    WHMCS:https://developers.whmcs.com/api-reference/addbillableitem/
+    POST:api.php?action='AddBillableItem'&
+    clientid=CLIENT_ID&
+    description='Quota cost for 'DOMAIN&
+    amount=USER_QUOTA*COST&
+    invoiceaction='nextinvoice'
+    ```
