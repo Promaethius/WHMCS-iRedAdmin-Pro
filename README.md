@@ -51,10 +51,14 @@ maxDomains=0
 
 #### WHMCS Account Update (handled through core module function) https://developers.whmcs.com/provisioning-modules/core-module-functions/ ChangePassword()
 1. Through a WHMCS hook watching for accountUpdates, pass the new password through to iRedAdmin API using the same <mail> as the email of the WHMCS user.
+2. WHMCS passes the details of the client through $param['clientsdetails']. 
+3. Grab email of client.
 `iRedAdmin:PUT /api/admin/<mail>?password=WHMCS_USER_PASS`
 
 #### WHMCS Account Suspension (handled through core module function) https://developers.whmcs.com/provisioning-modules/core-module-functions/ SuspendAccount()/UnsuspendAccount()
 1. For the sake of the end-users, only pass the API to disable/re-enable iRedAdmin admin.
+2. WHMCS passes the details of the client through $param['clientsdetails']. 
+3. Grab email of client.
 UnuspendAccount: `iRedAdmin:PUT /api/admin/<mail>?accountStatus=active`
 SuspendAccount: `iRedAdmin:PUT /api/admin/<mail>?accountStatus=disabled`
 
