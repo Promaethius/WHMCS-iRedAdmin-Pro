@@ -100,8 +100,7 @@ SuspendAccount: `iRedAdmin:PUT /api/admin/<mail>?accountStatus=disabled`
     clientid=CLIENT_ID&
     description='User cost for 'DOMAIN' for 'USER_COUNT&
     amount=USER_COUNT*COST&
-    invoiceaction='nextinvoice'
-    ```
+    invoiceaction='nextinvoice'```
     * The logic behind this cron cycle is that it is performed once per 24 hours, that each user will have an ondemand cost for 24 hours, and that the composite will be charged the next time the user is invoiced for the initial domain order.
 9. Similar in philosophy to the user billing section, charge an ondemand price for the amount that the domain administrator in iRedAdmin-Pro has assigned to each domain.
     * `iRedAdmin:GET /api/domain/<domain> "_data":"quota":USER_QUOTA`
@@ -111,5 +110,4 @@ SuspendAccount: `iRedAdmin:PUT /api/admin/<mail>?accountStatus=disabled`
     clientid=CLIENT_ID&
     description='Quota cost for 'DOMAIN&
     amount=USER_QUOTA*COST&
-    invoiceaction='nextinvoice'
-    ```
+    invoiceaction='nextinvoice'```
