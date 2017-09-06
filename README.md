@@ -64,19 +64,18 @@ SuspendAccount: `iRedAdmin:PUT /api/admin/<mail>?accountStatus=disabled`
     return("Please remove the domain from your mail admin account first.");
     Module errors are accessable through the admin panel.
 
-
 ### Cron
 #### WHMCS Cron Run https://developers.whmcs.com/provisioning-modules/supported-functions/ UsageUpdate()
 **NOTE: Runs per server.**
 This process is easier if it was on the WHMCS side since it has knowledge of existing admins but, because this is run per server and not per order or client, we have to create a list and a comparison.
-1. Start by comparing WHMCS users with iRedAdmin <admin> and drop if <admin> has no corresponding active client in WHMCS.
+1. Start by comparing WHMCS users with iRedAdmin admins and drop if admin has no corresponding active client in WHMCS.
   * For each `iRedAdmin:GET /api/admins NOT YET IMPLEMENTED`
-  * Do associate a ClientID with each <admin> in an array. `WHMCS:INTERNAL_API $results = localAPI('GetClientsDetails', array('email' => $admin, 'stats' => true));`
+  * Do associate a ClientID with each admin in an array. `WHMCS:INTERNAL_API $results = localAPI('GetClientsDetails', array('email' => $admin, 'stats' => true));`
   * A problem with this process is if the WHMCS user has changed their email.
     **TENTATIVE:** Possibly use a datastore for this?
-2. Drop the <admin> from the list if the <admin> is a superadmin. `iRedAdmin:GET /api/admin/<admin> "_data"."isglobaladmin":1`
-3. Drop the <admin> from the list if the <admin> has no managed domains. `iRedAdmin:GET /api/admin/<admin> "_data"."managed_domains"[]`
-4. For each <admin> left `iRedAdmin:GET /api/admin/<admin> "_data"."managed_domains"[]`
+2. Drop the admin from the list if the admin is a superadmin. `iRedAdmin:GET /api/admin/<mail> "_data"."isglobaladmin":1`
+3. Drop the admin from the list if the admin has no managed domains. `iRedAdmin:GET /api/admin/<mail> "_data"."managed_domains"[]`
+4. For each admin left `iRedAdmin:GET /api/admin/<mail> "_data"."managed_domains"[]`
   * For each managed domain, grab both the number of users and the amount of data in use for that domain. 
     USERS: `iRedAdmin:GET /api/domain/<domain> "_data"."mailboxes":`
     QUOTA: `iRedAdmin:GET /api/domain/<domain> "_data"."data_usage": NOT YET IMPLEMENTED`
@@ -86,7 +85,7 @@ This process is easier if it was on the WHMCS side since it has knowledge of exi
      $mbprorate = results[0][mbprorate];
      **NOTE:** Double check values are a float or drop the process with an error.
    * $domainprorate = $userprorate + $mbprorate;
-6. Add all these numbers as billable items per domain per <admin> to each WHMCS user. 
+6. Add all these numbers as billable items per domain per admin to each WHMCS user. 
 ```
 WHMCS:INTERNAL_API
 $postData = array(
