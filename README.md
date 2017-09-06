@@ -79,7 +79,7 @@ This process is easier if it was on the WHMCS side since it has knowledge of exi
 4. For each <admin> left `iRedAdmin:GET /api/admin/<admin> "_data"."managed_domains"[]`
   * For each managed domain, grab both the number of users and the amount of data in use for that domain. 
     USERS: `iRedAdmin:GET /api/domain/<domain> "_data"."mailboxes":`
-    QUOTA: `iRedAdmin:GET /api/domain/<domain> "_data"."quota_inuse": NOT YET IMPLEMENTED`
+    QUOTA: `iRedAdmin:GET /api/domain/<domain> "_data"."data_usage": NOT YET IMPLEMENTED`
 5. Grab per user, mb costs from the module. `WHMCS:INTERNAL_API $results = localAPI('GetModuleConfiguration', array('moduleName' => 'WHMCS-iRedAdmin-Pro', 'moduleType' => 'provisioning'));`
    * The results come back in arrayed format. Grab the first dimensional array item.
      $userprorate = results[0][userprorate];
