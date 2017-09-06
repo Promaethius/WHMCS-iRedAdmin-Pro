@@ -87,7 +87,8 @@ This process is easier if it was on the WHMCS side since it has knowledge of exi
      **NOTE:** Double check values are a float or drop the process with an error.
    * $domainprorate = $userprorate + $mbprorate;
 6. Add all these numbers as billable items per domain per <admin> to each WHMCS user. 
-```WHMCS:INTERNAL_API
+```
+WHMCS:INTERNAL_API
 $postData = array(
     'clientid' => CLIENT,
     'description' => 'Prorate billing for ' + DOMAIN,
@@ -95,4 +96,5 @@ $postData = array(
     'invoiceaction' => 'nextcron',
     'hours' => 24,
 );
+$results = localAPI('AddBillableItem', $postData);
 ```
