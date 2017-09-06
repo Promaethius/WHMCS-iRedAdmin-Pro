@@ -10,50 +10,8 @@ Purchase of a product in WHMCS will raise the iRedAdmin administrator's domain c
 The WHMCS server status cron function will ping the iRedAdmin-Pro domain to parse the number of users and then utilize the WHMCS api to invoice an amount per user per hour as well as total domain storage per hour.
 
 ## Action Flow
-### Administrator
-#### WHMCS Account Creation (handled through core module function) https://developers.whmcs.com/provisioning-modules/core-module-functions/ CreateAccount()
-    
-1. Check if the account exists. `iRedAdmin:GET /api/admin/<mail>`
-    * If it does exist, update it with zero alotted domains and zero total storage. `iRedAdmin:PUT /api/admin/<mail>?password=$WHMCS_USER_PASS&maxDomains=0`
-    * Get a list of domains assigned to administrator. `iRedAdmin:GET /api/admin/<mail> "_data"."managed_domains"[]`
-    * Update WHMCS user allotted domains with product list through internal api. (This action will branch to the WHMCS Server Product Purchase function tree. The purpose of this flow is to allow for existing domains to be imported into WHMCS billing.)
-        * Get a list of products assigned to the module. `WHMCS:https://developers.whmcs.com/api-reference/getproducts/ POST:api.php?action='GetProducts'&module='WHMCS-iRedAdminPro'`
-        * If no products are created, initialize.
-        ```
-        WHMCS:https://developers.whmcs.com/api-reference/addproduct/
-        POST:api.php?
-        action='AddProduct'&
-        name='Default iRedAdmin Domain Product'&
-        type='server'&
-        paytype='free'&
-        description='Initialized product for the WHMCS-iRedAdmin-Pro addon. Users are charged through WHMCS server status crons at $5 a user.'&
-        module='WHMCS-iRedAdminPro'
-        ```
-    * Select first returned product and grab the PID to pass to addOrder.
-    * Use list of domains to determine the number of products to add.
-    * Add products to the new user.
-    ```
-    WHMCS:https://developers.whmcs.com/api-reference/addorder/
-    POST:api.php?
-    action='AddOrder'&
-    clientid=WHMCS_USER_ID&
-    paymentmethod=mailin&
-    pid[0]=WHMCS_MODULE_PRODUCTDEFAULT
-    ```
-    
-2. If the admin account doesn't exist, create it with zero allotted domains and zero total storage.
-```
-iRedAdmin:POST /api/admin/<mail>?
-name='WHMCS_USER_NAME'&
-password='WHMCS_USER_PASS'&
-maxDomains=0
-```
-
-#### WHMCS Account Update (handled through core module function) https://developers.whmcs.com/provisioning-modules/core-module-functions/ ChangePassword()
-1. Through a WHMCS hook watching for accountUpdates, pass the new password through to iRedAdmin API using the same <mail> as the email of the WHMCS user.
-2. WHMCS passes the details of the client through $param['clientsdetails']. 
-3. Grab email of client.
-`iRedAdmin:PUT /api/admin/<mail>?password=WHMCS_USER_PASS`
+### Domain and Admin Relationship
+In this case, WHMCS Module Accounts are increases and decreases in the allotted number of domains to an iRedAdmin-Pro administrator's domain count.
 
 #### WHMCS Account Suspension (handled through core module function) https://developers.whmcs.com/provisioning-modules/core-module-functions/ SuspendAccount()/UnsuspendAccount()
 1. For the sake of the end-users, only pass the API to disable/re-enable iRedAdmin admin.
@@ -62,22 +20,32 @@ maxDomains=0
 UnuspendAccount: `iRedAdmin:PUT /api/admin/<mail>?accountStatus=active`
 SuspendAccount: `iRedAdmin:PUT /api/admin/<mail>?accountStatus=disabled`
 
-#### WHMCS Account Deletion (handled through core module function) https://developers.whmcs.com/provisioning-modules/core-module-functions/ TerminateAccount()
-1. Get iRedAdmin-Pro assigned domains for the iRedAdmin administrator. `NOT YET IMPLEMENTED`
-2. Delete each domain. `iRedAdmin:DELETE /api/domain/<domain>`
-3. Delete iRedAdmin-Pro Administrator. `iRedAdmin:DELETE /api/admin/<mail>`
-
-
-### Domain
-#### WHMCS Server Product Purchase
+#### WHMCS Server Product Purchase (handled through core module function) https://developers.whmcs.com/provisioning-modules/core-module-functions/ CreateAccount()
+`iRedAdmin:GET /api/admin/<mail> "_success"`
+1. If the account already exists, increment the max_domains of the administrator. `"_success":"true"`
+  * `iRedAdmin:GET /api/admin/<mail> "_data"."settings"."create_max_domains" = QUOTA`
+  * `iRedAdmin:PUT /api/admin/<mail>?maxDomains=QUOTA+1`
+2. If the account doesn't exist, create the iRedAdmin-Pro administrator with 1 max_domains. This should increment for every product past the first. Create a secure hashed 1st time password and pass it to the user. `"_success":"false"`
+  * `iRedAdmin:POST /api/admin/<mail>?name=NAME&password=PASS&accountStatus=active&language=en_US&isGlobalAdmin=no&maxDomains=1&maxQuota=0&maxUsers=0&maxAliases=0&maxLists=0`
 
 #### WHMCS Server Product Update
+**Nothing to Update**
+**TENTATIVE:** iRedAdmin-Pro account password changes are handled by WHMCS.
 
-#### WHMCS Server Product Deletion
+#### WHMCS Server Product Deletion 
+1. The problem faced here is how to handle deleting a product without deleting a specific domain from iRedMail. Therefore, the user is prompted to remove the domain from iRedMail before they go through the Product Deletion function. This also allows for data accountability. If the user owns more domains in iRedMail than the post-deletion from WHMCS, WHMCS will return an error and the product will not be removed. **NOTE: WHMCS system will automatically try to terminate accounts past due. In these cases, emails are sent to the administrator and should be handled manually.**
+2. Ping iRedAdmin-Pro for the number of accounts to an admin. `iRedAdmin:GET /api/admin/<mail> "_data"."managed_domains"[]`
+3. If the number is less than the quota, approve the product deletion and remove one from the quota. `iRedAdmin:GET /api/admin/<mail> "_data"."settings"."create_max_domains"`
+  * `iRedAdmin:PUT /api/admin/<mail>?maxDomains=QUOTA-1`
+4. If the number is greater than or equal to the quota, return an error. `iRedAdmin:GET /api/admin/<mail> "_data"."managed_domains"[]`
+  * http://developers.whmcs.com/provisioning-modules/core-module-functions/ return();
+    return("Please remove the domain from your mail admin account first.");
+    Module errors are accessable through the admin panel.
 
 
 ### Cron
 #### WHMCS Cron Run https://developers.whmcs.com/provisioning-modules/supported-functions/ UsageUpdate()
+Runs for each active product which is a process headache.
 1. Get a list of products based off WHMCS module. `WHMCS:https://developers.whmcs.com/api-reference/getproducts/ POST:api.php?action='GetProducts'&module='WHMCS-iRedAdminPro'`
 2. Get a list of active orders based off product list. `WHMCS:https://developers.whmcs.com/api-reference/getorders/ POST:api.php?action='GetOrders'&limitnum=0&status='Active'`
     * The returned JSON document needs to be sorted by the lineitems array returned.
