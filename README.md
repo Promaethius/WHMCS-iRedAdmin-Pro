@@ -9,6 +9,28 @@ Based on the iRedAdmin-Pro design, that an administrative account exists that is
 Purchase of a product in WHMCS will raise the iRedAdmin administrator's domain capacity by one. The domain can be billed as a separate object from users including total domain storage space.
 The WHMCS server status cron function will ping the iRedAdmin-Pro domain to parse the number of users and then utilize the WHMCS api to invoice an amount per user per hour as well as total domain storage per hour.
 
+## WHMCS Configuration Options
+```php
+function WHMCS-iRedAdmin-Pro_ConfigOptions() {
+    return [
+        "username" => [
+            "FriendlyName" => "Per-User Prorate 24H",
+            "Type" => "text", # Text Box
+            "Size" => "5", # Defines the Field Width
+            "Description" => "userprorate",
+            "Default" => "0.0",
+        ],
+        "password" => [
+            "FriendlyName" => "Per-MB Prorate 24H",
+            "Type" => "text", # Password Field
+            "Size" => "5", # Defines the Field Width
+            "Description" => "mbprorate",
+            "Default" => "0.0",
+        ],
+    ];
+}
+```
+
 ## Action Flow
 ### Domain and Admin Relationship
 In this case, WHMCS Module Accounts are increases and decreases in the allotted number of domains to an iRedAdmin-Pro administrator's domain count.
@@ -45,25 +67,32 @@ SuspendAccount: `iRedAdmin:PUT /api/admin/<mail>?accountStatus=disabled`
 
 ### Cron
 #### WHMCS Cron Run https://developers.whmcs.com/provisioning-modules/supported-functions/ UsageUpdate()
-Runs for each active product which is a process headache.
-1. Get a list of products based off WHMCS module. `WHMCS:https://developers.whmcs.com/api-reference/getproducts/ POST:api.php?action='GetProducts'&module='WHMCS-iRedAdminPro'`
-2. Get a list of active orders based off product list. `WHMCS:https://developers.whmcs.com/api-reference/getorders/ POST:api.php?action='GetOrders'&limitnum=0&status='Active'`
-    * The returned JSON document needs to be sorted by the lineitems array returned.
-    * `"orders[order][0][lineitems][lineitem][0][product]": WHMCS_MODULE_PRODUCT`
-3. Get a list of users based off list of active orders.
-    * Parsed and sorted JSON document that includes active module products.
-    * User ID contained in `"orders[order][0][userid]"`
-    * `WHMCS:https://developers.whmcs.com/api-reference/getclientsdetails/ POST:api.php?action='GetClientsDetails'&clientid=CLIENT_ID`
-    * Use returned `"client[email]"` field to compile a list of active iRedAdmin-Pro users.
-4. Get a list of iRedAdmin admins based off list of users. `iRedAdmin:GET /api/admin/<mail>`
-    * Only looking for existing iRedAdmin-Pro administrators with '_result:success'
-5. Get a list of domains based off list of iRedAdmin admins. `iRedAdmin:GET /api/admin/<mail> "_data"."managed_domains"[]`
-6. Assign list of domains to respective WHMCS users.
-7. Make an API call for each domain and create billable objects for each domain based off the number of users and quota used from the API response per cron cycle. `iRedAdmin:GET /api/domain/<domain>`
-8. For each user, compile the billable objects from their respective domains and use internal WHMCS API AddBillableItem. 
-    * `iRedAdmin:GET /api/domain/<domain> "_data":"mailboxcount":USER_COUNT`
-    * `WHMCS:https://developers.whmcs.com/api-reference/addbillableitem/ POST:api.php?action='AddBillableItem'&clientid=CLIENT_ID&description='User cost for 'DOMAIN' for 'USER_COUNT&amount=USER_COUNT*COST&invoiceaction='nextinvoice'`
-    * The logic behind this cron cycle is that it is performed once per 24 hours, that each user will have an ondemand cost for 24 hours, and that the composite will be charged the next time the user is invoiced for the initial domain order.
-9. Similar in philosophy to the user billing section, charge an ondemand price for the amount that the domain administrator in iRedAdmin-Pro has assigned to each domain.
-    * `iRedAdmin:GET /api/domain/<domain> "_data":"quota":USER_QUOTA`
-    * `WHMCS:https://developers.whmcs.com/api-reference/addbillableitem/ POST:api.php?action='AddBillableItem'&clientid=CLIENT_ID&description='Quota cost for 'DOMAIN&amount=USER_QUOTA*COST&invoiceaction='nextinvoice'`
+**NOTE: Runs per server.**
+This process is easier if it was on the WHMCS side since it has knowledge of existing admins but, because this is run per server and not per order or client, we have to create a list and a comparison.
+1. Start by comparing WHMCS users with iRedAdmin <admin> and drop if <admin> has no corresponding active client in WHMCS.
+  * For each `iRedAdmin:GET /api/admins NOT YET IMPLEMENTED`
+  * Do associate a ClientID with each <admin> in an array. `WHMCS:INTERNAL_API $results = localAPI('GetClientsDetails', array('email' => $admin, 'stats' => true));`
+  * A problem with this process is if the WHMCS user has changed their email.
+    **TENTATIVE:** Possibly use a datastore for this?
+2. Drop the <admin> from the list if the <admin> is a superadmin. `iRedAdmin:GET /api/admin/<admin> "_data"."isglobaladmin":1`
+3. Drop the <admin> from the list if the <admin> has no managed domains. `iRedAdmin:GET /api/admin/<admin> "_data"."managed_domains"[]`
+4. For each <admin> left `iRedAdmin:GET /api/admin/<admin> "_data"."managed_domains"[]`
+  * For each managed domain, grab both the number of users and the amount of data in use for that domain. 
+    USERS: `iRedAdmin:GET /api/domain/<domain> "_data"."mailboxes":`
+    QUOTA: `iRedAdmin:GET /api/domain/<domain> "_data"."quota_inuse": NOT YET IMPLEMENTED`
+5. Grab per user, mb costs from the module. `WHMCS:INTERNAL_API $results = localAPI('GetModuleConfiguration', array('moduleName' => 'WHMCS-iRedAdmin-Pro', 'moduleType' => 'provisioning'));`
+   * The results come back in arrayed format. Grab the first dimensional array item.
+     $userprorate = results[0][userprorate];
+     $mbprorate = results[0][mbprorate];
+     **NOTE:** Double check values are a float or drop the process with an error.
+   * $domainprorate = $userprorate + $mbprorate;
+6. Add all these numbers as billable items per domain per <admin> to each WHMCS user. 
+```WHMCS:INTERNAL_API
+$postData = array(
+    'clientid' => CLIENT,
+    'description' => 'Prorate billing for ' + DOMAIN,
+    'amount' => DOMAINPRORATE,
+    'invoiceaction' => 'nextcron',
+    'hours' => 24,
+);
+```
