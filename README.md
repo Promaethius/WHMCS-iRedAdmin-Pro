@@ -15,7 +15,7 @@ The WHMCS server status cron function will ping the iRedAdmin-Pro domain to pars
     
 1. Check if the account exists. `iRedAdmin:GET /api/admin/<mail>`
     * If it does exist, update it with zero alotted domains and zero total storage. `iRedAdmin:PUT /api/admin/<mail>?password=$WHMCS_USER_PASS&maxDomains=0`
-    * Get a list of domains assigned to administrator. `NOT YET IMPLEMENTED`
+    * Get a list of domains assigned to administrator. `iRedAdmin:GET /api/admin/<mail> "_data"."managed_domains"[]`
     * Update WHMCS user allotted domains with product list through internal api. (This action will branch to the WHMCS Server Product Purchase function tree. The purpose of this flow is to allow for existing domains to be imported into WHMCS billing.)
         * Get a list of products assigned to the module. `WHMCS:https://developers.whmcs.com/api-reference/getproducts/ POST:api.php?action='GetProducts'&module='WHMCS-iRedAdminPro'`
         * If no products are created, initialize.
@@ -89,7 +89,7 @@ SuspendAccount: `iRedAdmin:PUT /api/admin/<mail>?accountStatus=disabled`
     * Use returned `"client[email]"` field to compile a list of active iRedAdmin-Pro users.
 4. Get a list of iRedAdmin admins based off list of users. `iRedAdmin:GET /api/admin/<mail>`
     * Only looking for existing iRedAdmin-Pro administrators with '_result:success'
-5. Get a list of domains based off list of iRedAdmin admins. `NOT YET IMPLEMENTED`
+5. Get a list of domains based off list of iRedAdmin admins. `iRedAdmin:GET /api/admin/<mail> "_data"."managed_domains"[]`
 6. Assign list of domains to respective WHMCS users.
 7. Make an API call for each domain and create billable objects for each domain based off the number of users and quota used from the API response per cron cycle. `iRedAdmin:GET /api/domain/<domain>`
 8. For each user, compile the billable objects from their respective domains and use internal WHMCS API AddBillableItem. 
