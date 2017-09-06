@@ -12,7 +12,26 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.*/
-   
+
+function WHMCS-iRedAdmin-Pro_ConfigOptions() {
+    return [
+        "username" => [
+            "FriendlyName" => "Per-User Prorate 24H",
+            "Type" => "text", # Text Box
+            "Size" => "5", # Defines the Field Width
+            "Description" => "userprorate",
+            "Default" => "0.0",
+        ],
+        "password" => [
+            "FriendlyName" => "Per-MB Prorate 24H",
+            "Type" => "text", # Password Field
+            "Size" => "5", # Defines the Field Width
+            "Description" => "mbprorate",
+            "Default" => "0.0",
+        ],
+    ];
+}
+
 function WHMCS-iRedAdmin-Pro_CreateAccount($params) {
     
 }
