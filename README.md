@@ -72,8 +72,8 @@ $results = localAPI($command, $postData);
     * `iRedAdmin:PUT /api/admin/<mail>?maxDomains=QUOTA-1`
 4. If the number is greater than or equal to the quota, return an error. `iRedAdmin:GET /api/admin/<mail> "_data"."managed_domains"[]`
     * http://developers.whmcs.com/provisioning-modules/core-module-functions/ return();
-    return("Please remove the domain from your mail admin account first.");
-    Module errors are accessable through the admin panel.
+      return("Please remove the domain from your mail admin account first.");
+      Module errors are accessable through the admin panel.
 
 ### Cron
 #### WHMCS Cron Run https://developers.whmcs.com/provisioning-modules/supported-functions/ UsageUpdate()
