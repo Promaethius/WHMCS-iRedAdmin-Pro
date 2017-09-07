@@ -43,12 +43,12 @@ SuspendAccount: `iRedAdmin:PUT /api/admin/<mail>?accountStatus=disabled`
 #### WHMCS Server Product Purchase (handled through core module function) https://developers.whmcs.com/provisioning-modules/core-module-functions/ CreateAccount()
 `iRedAdmin:GET /api/admin/<mail> "_success"`
 1. If the account already exists, increment the max_domains of the administrator. `"_success":"true"`
-  * `iRedAdmin:GET /api/admin/<mail> "_data"."settings"."create_max_domains" = QUOTA`
-  * `iRedAdmin:PUT /api/admin/<mail>?maxDomains=QUOTA+1`
+    * `iRedAdmin:GET /api/admin/<mail> "_data"."settings"."create_max_domains" = QUOTA`
+    * `iRedAdmin:PUT /api/admin/<mail>?maxDomains=QUOTA+1`
 2. If the account doesn't exist, create the iRedAdmin-Pro administrator with 1 max_domains. This should increment for every product past the first. Create a secure hashed 1st time password and email it to the user. `"_success":"false"`
-  * `iRedAdmin:POST /api/admin/<mail>?name=NAME&password=PASS&accountStatus=active&language=en_US&isGlobalAdmin=no&maxDomains=1&maxQuota=0&maxUsers=0&maxAliases=0&maxLists=0`
-  * Get user's id passed through the module function as $params['clientsdetails'].
-  * Email password to user through WHMCS.
+    * `iRedAdmin:POST /api/admin/<mail>?name=NAME&password=PASS&accountStatus=active&language=en_US&isGlobalAdmin=no&maxDomains=1&maxQuota=0&maxUsers=0&maxAliases=0&maxLists=0`
+    * Get user's id passed through the module function as $params['clientsdetails'].
+    * Email password to user through WHMCS.
 ```
 WHMCS:INTERNAL_API 
 $postData = array(
@@ -69,9 +69,9 @@ $results = localAPI($command, $postData);
 1. The problem faced here is how to handle deleting a product without deleting a specific domain from iRedMail. Therefore, the user is prompted to remove the domain from iRedMail before they go through the Product Deletion function. This also allows for data accountability. If the user owns more domains in iRedMail than the post-deletion from WHMCS, WHMCS will return an error and the product will not be removed. **NOTE: WHMCS system will automatically try to terminate accounts past due. In these cases, emails are sent to the administrator and should be handled manually.**
 2. Ping iRedAdmin-Pro for the number of accounts to an admin. `iRedAdmin:GET /api/admin/<mail> "_data"."managed_domains"[]`
 3. If the number is less than the quota, approve the product deletion and remove one from the quota. `iRedAdmin:GET /api/admin/<mail> "_data"."settings"."create_max_domains"`
-  * `iRedAdmin:PUT /api/admin/<mail>?maxDomains=QUOTA-1`
+    * `iRedAdmin:PUT /api/admin/<mail>?maxDomains=QUOTA-1`
 4. If the number is greater than or equal to the quota, return an error. `iRedAdmin:GET /api/admin/<mail> "_data"."managed_domains"[]`
-  * http://developers.whmcs.com/provisioning-modules/core-module-functions/ return();
+    * http://developers.whmcs.com/provisioning-modules/core-module-functions/ return();
     return("Please remove the domain from your mail admin account first.");
     Module errors are accessable through the admin panel.
 
@@ -80,14 +80,14 @@ $results = localAPI($command, $postData);
 **NOTE: Runs per server.**
 This process is easier if it was on the WHMCS side since it has knowledge of existing admins but, because this is run per server and not per order or client, we have to create a list and a comparison.
 1. Start by comparing WHMCS users with iRedAdmin admins and drop if admin has no corresponding active client in WHMCS.
-  * For each `iRedAdmin:GET /api/admins NOT YET IMPLEMENTED`
-  * Do associate a ClientID with each admin in an array. `WHMCS:INTERNAL_API $results = localAPI('GetClientsDetails', array('email' => $admin, 'stats' => true));`
-  * A problem with this process is if the WHMCS user has changed their email.
+    * For each `iRedAdmin:GET /api/admins NOT YET IMPLEMENTED`
+    * Do associate a ClientID with each admin in an array. `WHMCS:INTERNAL_API $results = localAPI('GetClientsDetails', array('email' => $admin, 'stats' => true));`
+    * A problem with this process is if the WHMCS user has changed their email.
     **TENTATIVE:** Possibly use a datastore for this?
 2. Drop the admin from the list if the admin is a superadmin. `iRedAdmin:GET /api/admin/<mail> "_data"."isglobaladmin":1`
 3. Drop the admin from the list if the admin has no managed domains. `iRedAdmin:GET /api/admin/<mail> "_data"."managed_domains"[]`
 4. For each admin left `iRedAdmin:GET /api/admin/<mail> "_data"."managed_domains"[]`
-  * For each managed domain, grab both the number of users and the amount of data in use for that domain. 
+    * For each managed domain, grab both the number of users and the amount of data in use for that domain. 
     USERS: `iRedAdmin:GET /api/domain/<domain> "_data"."mailboxes":`
     QUOTA: `iRedAdmin:GET /api/domain/<domain> "_data"."data_usage": NOT YET IMPLEMENTED`
 5. Grab per user, mb costs from the module. `WHMCS:INTERNAL_API $results = localAPI('GetModuleConfiguration', array('moduleName' => 'WHMCS-iRedAdmin-Pro', 'moduleType' => 'provisioning'));`
