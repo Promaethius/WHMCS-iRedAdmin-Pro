@@ -36,9 +36,7 @@ function WHMCS-iRedAdmin-Pro_ConfigOptions() {
 In this case, WHMCS Module Accounts are increases and decreases in the allotted number of domains to an iRedAdmin-Pro administrator's domain count.
 
 #### WHMCS Account Suspension (handled through core module function) https://developers.whmcs.com/provisioning-modules/core-module-functions/ SuspendAccount()/UnsuspendAccount()
-1. For the sake of the end-users, only pass the API to disable/re-enable iRedAdmin admin.
-2. WHMCS passes the details of the client through $param['clientsdetails']. 
-3. Grab email of client.
+* For the sake of the end-users, only pass the API to disable/re-enable iRedAdmin admin.
 UnuspendAccount: `iRedAdmin:PUT /api/admin/<mail>?accountStatus=active`
 SuspendAccount: `iRedAdmin:PUT /api/admin/<mail>?accountStatus=disabled`
 
@@ -47,8 +45,21 @@ SuspendAccount: `iRedAdmin:PUT /api/admin/<mail>?accountStatus=disabled`
 1. If the account already exists, increment the max_domains of the administrator. `"_success":"true"`
   * `iRedAdmin:GET /api/admin/<mail> "_data"."settings"."create_max_domains" = QUOTA`
   * `iRedAdmin:PUT /api/admin/<mail>?maxDomains=QUOTA+1`
-2. If the account doesn't exist, create the iRedAdmin-Pro administrator with 1 max_domains. This should increment for every product past the first. Create a secure hashed 1st time password and pass it to the user. `"_success":"false"`
+2. If the account doesn't exist, create the iRedAdmin-Pro administrator with 1 max_domains. This should increment for every product past the first. Create a secure hashed 1st time password and email it to the user. `"_success":"false"`
   * `iRedAdmin:POST /api/admin/<mail>?name=NAME&password=PASS&accountStatus=active&language=en_US&isGlobalAdmin=no&maxDomains=1&maxQuota=0&maxUsers=0&maxAliases=0&maxLists=0`
+  * Get user's id passed through the module function as $params['clientsdetails'].
+  * Email password to user through WHMCS.
+```
+WHMCS:INTERNAL_API 
+$postData = array(
+    'id' => CLIENT,
+    'customtype' => 'support',
+    'customsubject' => 'Product Welcome Email',
+    'custommessage' => 'New mail administrator signup.<p>Username and Password Below</p><p>{$custommerge}<br />{$custommerge2}</p>',
+    'customvars' => base64_encode(serialize(array("custommerge"=>$clientmail, "custommerge2"=>$clientpass))),
+);
+$results = localAPI($command, $postData);
+```
 
 #### WHMCS Server Product Update
 **Nothing to Update**
