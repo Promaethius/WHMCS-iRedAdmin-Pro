@@ -64,7 +64,7 @@ function Login(string $url, string $admin, string $pass) {
 
    // Call the API
    $ch = curl_init();
-   curl_setopt($ch, CURLOPT_URL, $url . '/api.php');
+   curl_setopt($ch, CURLOPT_URL, $url . '/api/login');
    curl_setopt($ch, CURLOPT_POST, 1);
    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
