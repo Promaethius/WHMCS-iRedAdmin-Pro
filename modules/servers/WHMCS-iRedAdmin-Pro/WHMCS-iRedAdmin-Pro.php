@@ -55,3 +55,37 @@ function WHMCS-iRedAdmin-Pro_ChangePassword($params) {
 function WHMCS-iRedAdmin-Pro_UsageUpdate($params) {
     
 }
+
+function Login(string $url, string $admin, string $pass) {
+   $postfields = array(
+       'username' => $admin,
+       'password' => $pass,
+   );
+
+   // Call the API
+   $ch = curl_init();
+   curl_setopt($ch, CURLOPT_URL, $url . '/api.php');
+   curl_setopt($ch, CURLOPT_POST, 1);
+   curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+   curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+   curl_setopt($ch, CURLOPT_HEADER, 1);
+   curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 1);
+   curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+   curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postfields));
+ 
+   $response = curl_exec($ch);
+   if (curl_error($ch)) {
+       die('Unable to connect: ' . curl_errno($ch) . ' - ' . curl_error($ch));
+   }
+   curl_close($ch);
+ 
+   preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $response, $matches);
+   $cookies = array();
+   foreach($matches[1] as $item) {
+       parse_str($item, $cookie);
+       $cookies = array_merge($cookies, $cookie);
+       // TODO: select only cookie matching regex iRedAdmin-Pro-mysql or ldap
+   }
+ 
+   return($cookies);
+}
