@@ -15,18 +15,18 @@
 
 function WHMCS-iRedAdmin-Pro_ConfigOptions() {
     return [
-        "username" => [
+        "userprorate" => [
             "FriendlyName" => "Per-User Prorate 24H",
             "Type" => "text", # Text Box
             "Size" => "5", # Defines the Field Width
-            "Description" => "userprorate",
+            "Description" => "Cost per User charged to a WHMCS user at the end of every 24H period.",
             "Default" => "0.0",
         ],
-        "password" => [
+        "mbprorate" => [
             "FriendlyName" => "Per-MB Prorate 24H",
             "Type" => "text", # Password Field
             "Size" => "5", # Defines the Field Width
-            "Description" => "mbprorate",
+            "Description" => "Cost per MB charged to a WHMCS user at the end of every 24H period.",
             "Default" => "0.0",
         ],
     ];
