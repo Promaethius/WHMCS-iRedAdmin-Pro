@@ -57,28 +57,45 @@ function WHMCS-iRedAdmin-Pro_UsageUpdate($params) {
 }
 
 function Login(string $admin, string $pass, string $url) {
+// Prep array for POST login.
    $postfields = array(
        'username' => $admin,
        'password' => $pass,
    );
-
-   preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', ConnectionHandler($postfields,$url,'/api/login'), $matches);
-   $cookies = array();
+// Take response and regex it for cookies
+   preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', ConnectionHandler($postfields,$url,'/api/login','POST'), $matches);
+// For each cookie returned, look for the one starting with iRedAdmin-Pro and assign it to a variable.
    foreach($matches[1] as $item) {
        parse_str($item, $cookie);
-       $cookies = array_merge($cookies, $cookie);
-       // TODO: select only cookie matching regex iRedAdmin-Pro-mysql or ldap
+    
+       if (substr( $cookie, 0, 4 ) === "iRedAdmin-Pro") {
+           $login_cookie = $cookie;
+       }
    }
- 
-   return($cookies);
+// Return the login cookie in format iRedAdmin-Pro-*type*=...
+   return($login_cookie);
 }
 
-function ConnectionHandler(array $postfields, string $url, string $uri) {
+function ConnectionHandler(array $postfields, string $url, string $uri, string $method) {
 
    // Call the API
    $ch = curl_init();
    curl_setopt($ch, CURLOPT_URL, $url . $uri);
-   curl_setopt($ch, CURLOPT_POST, 1);
+// Switch for API request types
+   switch ($method) {
+    case 'POST':
+     curl_setopt($ch, CURLOPT_POST, 1);
+     break;
+    case 'GET':
+     curl_setopt($ch, CURLOPT_GET, 1);
+     break;
+    case 'PUT':
+     curl_setopt($ch, CURLOPT_PUT, 1);
+     break;
+    case 'DELETE':
+     curl_setopt($ch, CURLOPT_DELETE, 1);
+     break;
+   }
    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
    curl_setopt($ch, CURLOPT_HEADER, 1);
