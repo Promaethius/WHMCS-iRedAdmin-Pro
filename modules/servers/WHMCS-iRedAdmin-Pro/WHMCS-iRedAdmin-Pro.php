@@ -56,15 +56,28 @@ function WHMCS-iRedAdmin-Pro_UsageUpdate($params) {
     
 }
 
-function Login(string $url, string $admin, string $pass) {
+function Login(string $admin, string $pass, string $url) {
    $postfields = array(
        'username' => $admin,
        'password' => $pass,
    );
 
+   preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', ConnectionHandler($postfields,$url,'/api/login'), $matches);
+   $cookies = array();
+   foreach($matches[1] as $item) {
+       parse_str($item, $cookie);
+       $cookies = array_merge($cookies, $cookie);
+       // TODO: select only cookie matching regex iRedAdmin-Pro-mysql or ldap
+   }
+ 
+   return($cookies);
+}
+
+function ConnectionHandler(array $postfields, string $url, string $uri) {
+
    // Call the API
    $ch = curl_init();
-   curl_setopt($ch, CURLOPT_URL, $url . '/api/login');
+   curl_setopt($ch, CURLOPT_URL, $url . $uri);
    curl_setopt($ch, CURLOPT_POST, 1);
    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -79,13 +92,5 @@ function Login(string $url, string $admin, string $pass) {
    }
    curl_close($ch);
  
-   preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $response, $matches);
-   $cookies = array();
-   foreach($matches[1] as $item) {
-       parse_str($item, $cookie);
-       $cookies = array_merge($cookies, $cookie);
-       // TODO: select only cookie matching regex iRedAdmin-Pro-mysql or ldap
-   }
- 
-   return($cookies);
+   return($response);
 }
