@@ -76,7 +76,7 @@ function Login(string $admin, string $pass, string $url) {
    return($login_cookie);
 }
 
-function ConnectionHandler(array $postfields, string $url, string $uri, string $method) {
+function ConnectionHandler(array $postfields, string $url, string $uri, string $method, string $login_cookie) {
 
    // Call the API
    $ch = curl_init();
@@ -95,6 +95,10 @@ function ConnectionHandler(array $postfields, string $url, string $uri, string $
     case 'DELETE':
      curl_setopt($ch, CURLOPT_DELETE, 1);
      break;
+   }
+// Check for a login cookie first. If it exists, then send it along with the request.
+   if ($login_cookie != '') {
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array("Cookie: " + $login_cookie));
    }
    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
