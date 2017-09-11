@@ -37,11 +37,43 @@ function WHMCS-iRedAdmin-Pro_CreateAccount($params) {
 }
 
 function WHMCS-iRedAdmin-Pro_SuspendAccount($params) {
-    
+    // Return an error message if no server is assigned.
+    if ($params['server'] == false) {
+        return("A server needs to be assigned to this product.");
+    }
+    // PUT data that disables iRedAdmin account.
+    $fields = array(
+        'accountStatus' => 'disabled'
+    )
+    // Use as few variables as possible! Most of the functions return what we need.
+    // Json response is ConnectionHandler(PUT data, hostname and schema, uri of iRedAdmin API plus the username of the user, CURL method, returned iRedAdmin cookie)
+    $json = json_decode(ConnectionHandler($fields, $params['serverhostname'], '/api/admins/' + $params['clientsdetails']['email'], 'PUT', Login($params['serverusername'], $params['serverpassword'], $params['serverhostname'])), true);
+    // Check resulting json data if the query was a success. Let WHMCS if it went through, else, return iRedAdmin's error message.
+    if ($json['_success'] == true) {
+        return('success');
+    else {
+        return($json['_msg']);
+    }
 }
 
 function WHMCS-iRedAdmin-Pro_UnsuspendAccount($params) {
-    
+        // Return an error message if no server is assigned.
+    if ($params['server'] == false) {
+        return("A server needs to be assigned to this product.");
+    }
+    // PUT data that enables iRedAdmin account.
+    $fields = array(
+        'accountStatus' => 'enabled'
+    )
+    // Use as few variables as possible! Most of the functions return what we need.
+    // Json response is ConnectionHandler(PUT data, hostname and schema, uri of iRedAdmin API plus the username of the user, CURL method, returned iRedAdmin cookie)
+    $json = json_decode(ConnectionHandler($fields, $params['serverhostname'], '/api/admins/' + $params['clientsdetails']['email'], 'PUT', Login($params['serverusername'], $params['serverpassword'], $params['serverhostname'])), true);
+    // Check resulting json data if the query was a success. Let WHMCS if it went through, else, return iRedAdmin's error message.
+    if ($json['_success'] == true) {
+        return('success');
+    else {
+        return($json['_msg']);
+    }
 }
 
 function WHMCS-iRedAdmin-Pro_TerminateAccount($params) {
@@ -58,12 +90,12 @@ function WHMCS-iRedAdmin-Pro_UsageUpdate($params) {
 
 function Login(string $admin, string $pass, string $url) {
 // Prep array for POST login.
-   $postfields = array(
+   $fields = array(
        'username' => $admin,
        'password' => $pass,
    );
 // Take response and regex it for cookies
-   preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', ConnectionHandler($postfields,$url,'/api/login','POST'), $matches);
+   preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', ConnectionHandler($fields, $url,'/api/login', 'POST'), $matches);
 // For each cookie returned, look for the one starting with iRedAdmin-Pro and assign it to a variable.
    foreach($matches[1] as $item) {
        parse_str($item, $cookie);
@@ -76,7 +108,7 @@ function Login(string $admin, string $pass, string $url) {
    return($login_cookie);
 }
 
-function ConnectionHandler(array $postfields, string $url, string $uri, string $method, string $login_cookie) {
+function ConnectionHandler(array $fields, string $url, string $uri, string $method, string $login_cookie) {
 
    // Call the API
    $ch = curl_init();
