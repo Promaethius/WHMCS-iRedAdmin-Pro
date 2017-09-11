@@ -9,6 +9,13 @@ Based on the iRedAdmin-Pro design, that an administrative account exists that is
 Purchase of a product in WHMCS will raise the iRedAdmin administrator's domain capacity by one. The domain can be billed as a separate object from users including total domain storage space.
 The WHMCS server status cron function will ping the iRedAdmin-Pro domain to parse the number of users and then utilize the WHMCS api to invoice an amount per user per hour as well as total domain storage per hour.
 
+This module makes quite a few assumptions about the separation of products: that iRedAdmin is best suited for managing domains, users, quota, and mailboxes and that WHMCS is best suited to bill those objects. Therefore, the only configurations that WHMCS uses on iRedAdmin is as follows:
+1) Creation of an iRedAdmin admin.
+2) Suspension/Unsuspension of an admin.
+3) Increasing and reducing the number of max_domains allowed for an admin.
+
+Pro-rate billing is included by default so the iRedAdmin admin can specify in his domains how many users/storage could exist and be billed for it accordingly as a soft ceiling.
+
 ## WHMCS Configuration Options
 ```php
 function WHMCS-iRedAdmin-Pro_ConfigOptions() {
