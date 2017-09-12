@@ -13,6 +13,9 @@
    See the License for the specific language governing permissions and
    limitations under the License.*/
 
+// Load GUZZLE and SQLite
+require 'vendor/autoload.php';
+
 function WHMCS-iRedAdmin-Pro_ConfigOptions() {
     return [
         "userprorate" => [
