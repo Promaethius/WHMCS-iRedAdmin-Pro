@@ -13,6 +13,8 @@ This module makes quite a few assumptions about the separation of products: that
 1) Creation of an iRedAdmin admin.
 2) Suspension/Unsuspension of an admin.
 3) Increasing and reducing the number of max_domains allowed for an admin.
+4) **TODO** Deletion of an iRedAdmin admin after a period of inactivity.
+5) **TODO** Keep a database of WHMCS client IDs and matching iRedAdmin usernames. WHMCS users can change their emails without effecting the plugin.
 
 Pro-rate billing is included by default so the iRedAdmin admin can specify in his domains how many users/storage could exist and be billed for it accordingly as a soft ceiling.
 
