@@ -13,6 +13,8 @@
    See the License for the specific language governing permissions and
    limitations under the License.*/
 
+// logModuleCall($param['moduletype'], $action, $requestString, $responseData, $processedData, $replaceVars);
+
 // Load GUZZLE and SQLite
 require __DIR__ . 'vendor/autoload.php';
 
@@ -28,6 +30,12 @@ class DB extends SQLite3 {
  function __construct() {
   $this->open(__DIR__ . 'users.db');
  }
+}
+
+// Init Database Connnection
+$ClientBase = new DB();
+if(!$db) {
+ die($db->lastErrorMsg());
 }
 
 function WHMCS-iRedAdmin-Pro_ConfigOptions() {
