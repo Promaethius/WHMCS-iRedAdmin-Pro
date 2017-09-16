@@ -63,11 +63,33 @@ function WHMCS-iRedAdmin-Pro_CreateAccount($params) {
 
 function WHMCS-iRedAdmin-Pro_SuspendAccount($params) {
  // Using the client ID param, check the SQLite database for the corresponding iRedAdmin admin
- 
+ try {
+  $response = $client->put($url . '/api/admin/' . $admin, [
+   'query' => [
+    'accountStatus' => 'disabled',
+   ]
+  ]);
+ } catch (RequestException $e) {
+  die(Psr7\str($e->getRequest()));
+  if ($e->hasResponse()) {
+   die(Psr7\str($e->getResponse()));
+  }
+ }
 }
 
 function WHMCS-iRedAdmin-Pro_UnsuspendAccount($params) {
- 
+ try {
+  $response = $client->put($url . '/api/admin/' . $admin, [
+   'query' => [
+    'accountStatus' => 'enabled',
+   ]
+  ]);
+ } catch (RequestException $e) {
+  die(Psr7\str($e->getRequest()));
+  if ($e->hasResponse()) {
+   die(Psr7\str($e->getResponse()));
+  }
+ }
 }
 
 function WHMCS-iRedAdmin-Pro_TerminateAccount($params) {
