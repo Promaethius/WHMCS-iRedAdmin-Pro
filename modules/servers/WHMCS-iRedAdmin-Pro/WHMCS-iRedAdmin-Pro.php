@@ -39,22 +39,22 @@ if(!$db) {
 }
 
 function WHMCS-iRedAdmin-Pro_ConfigOptions() {
-    return [
-        "userprorate" => [
-            "FriendlyName" => "Per-User Prorate 24H",
-            "Type" => "text", # Text Box
-            "Size" => "5", # Defines the Field Width
-            "Description" => "Cost per User charged to a WHMCS user at the end of every 24H period.",
-            "Default" => "0.0",
-        ],
-        "mbprorate" => [
-            "FriendlyName" => "Per-MB Prorate 24H",
-            "Type" => "text", # Password Field
-            "Size" => "5", # Defines the Field Width
-            "Description" => "Cost per MB charged to a WHMCS user at the end of every 24H period.",
-            "Default" => "0.0",
-        ],
-    ];
+ return [
+  "userprorate" => [
+   "FriendlyName" => "Per-User Prorate 24H",
+   "Type" => "text", # Text Box
+   "Size" => "5", # Defines the Field Width
+   "Description" => "Cost per User charged to a WHMCS user at the end of every 24H period.",
+   "Default" => "0.0",
+  ],
+  "mbprorate" => [
+   "FriendlyName" => "Per-MB Prorate 24H",
+   "Type" => "text", # Password Field
+   "Size" => "5", # Defines the Field Width
+   "Description" => "Cost per MB charged to a WHMCS user at the end of every 24H period.",
+   "Default" => "0.0",
+  ],
+ ];
 }
 
 function WHMCS-iRedAdmin-Pro_CreateAccount($params) {
