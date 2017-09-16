@@ -67,8 +67,9 @@ function WHMCS-iRedAdmin-Pro_UsageUpdate($params) {
 }
 
 function Login(string $admin, string $pass, string $url) {
+ // Try Catch function for client login. Passes to the login interface and stores the cookie.
  try {
-  $response = $client->get($url, [
+  $response = $client->post($url . '/api/login', [
    'query' => [
     'username' => $admin,
     'password' => $pass,
@@ -80,8 +81,13 @@ function Login(string $admin, string $pass, string $url) {
    die(Psr7\str($e->getResponse()));
   }
  }
- 
+ // Decode json response string into array format
  $body = json_decode($response->getBody());
- 
- return($body['_success']);
+ // Makes exception for the fringe cases where no information is returned
+ if ($body['_success'] == 'true')
+ {
+  return(true);
+ } else {
+  return(false);
+ }
 }
