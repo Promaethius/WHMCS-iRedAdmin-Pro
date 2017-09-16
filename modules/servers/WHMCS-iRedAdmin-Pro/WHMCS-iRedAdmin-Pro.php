@@ -14,7 +14,7 @@
    limitations under the License.*/
 
 // Load GUZZLE and SQLite
-require 'vendor/autoload.php';
+require __DIR__ . 'vendor/autoload.php';
 
 // Exception handlers
 use GuzzleHttp\Psr7;
@@ -22,6 +22,13 @@ use GuzzleHttp\Exception\RequestException;
 
 // Init a new Guzzle Client set to store and use cookies
 $client = new GuzzleHttp\Client(['cookies' => true]);
+
+// Database Class for non-blocking SQLite database
+class DB extends SQLite3 {
+ function __construct() {
+  $this->open(__DIR__ . 'users.db');
+ }
+}
 
 function WHMCS-iRedAdmin-Pro_ConfigOptions() {
     return [
@@ -43,27 +50,24 @@ function WHMCS-iRedAdmin-Pro_ConfigOptions() {
 }
 
 function WHMCS-iRedAdmin-Pro_CreateAccount($params) {
-
+ 
 }
 
 function WHMCS-iRedAdmin-Pro_SuspendAccount($params) {
-
+ // Using the client ID param, check the SQLite database for the corresponding iRedAdmin admin
+ 
 }
 
 function WHMCS-iRedAdmin-Pro_UnsuspendAccount($params) {
-
+ 
 }
 
 function WHMCS-iRedAdmin-Pro_TerminateAccount($params) {
-
-}
-
-function WHMCS-iRedAdmin-Pro_ChangePassword($params) {
-
+ 
 }
 
 function WHMCS-iRedAdmin-Pro_UsageUpdate($params) {
-
+ 
 }
 
 function Login(string $admin, string $pass, string $url) {
