@@ -85,7 +85,7 @@ function Login(string $admin, string $pass, string $url) {
    'query' => [
     'username' => $admin,
     'password' => $pass,
-    ]
+   ]
   ]);
  } catch (RequestException $e) {
   die(Psr7\str($e->getRequest()));
