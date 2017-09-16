@@ -44,6 +44,9 @@ function WHMCS-iRedAdmin-Pro_ConfigOptions() {
 ### Domain and Admin Relationship
 In this case, WHMCS Module Accounts are increases and decreases in the allotted number of domains to an iRedAdmin-Pro administrator's domain count.
 
+### Login Process
+A single client will be initialized for the module with cookie capabilities. This handles syncronous login proceadures so that you don't have to log in each time a request is made.
+
 #### WHMCS Account Suspension (handled through core module function) https://developers.whmcs.com/provisioning-modules/core-module-functions/ SuspendAccount()/UnsuspendAccount()
 * For the sake of the end-users, only pass the API to disable/re-enable iRedAdmin admin.
 UnuspendAccount: `iRedAdmin:PUT /api/admin/<mail>?accountStatus=active`
