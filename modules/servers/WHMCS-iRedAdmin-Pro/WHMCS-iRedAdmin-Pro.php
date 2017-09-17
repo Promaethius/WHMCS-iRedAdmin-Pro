@@ -78,6 +78,7 @@ function WHMCS-iRedAdmin-Pro_SuspendAccount($params) {
 }
 
 function WHMCS-iRedAdmin-Pro_UnsuspendAccount($params) {
+ 
  try {
   $response = $client->put($url . '/api/admin/' . $admin, [
    'query' => [
@@ -98,6 +99,54 @@ function WHMCS-iRedAdmin-Pro_TerminateAccount($params) {
 
 function WHMCS-iRedAdmin-Pro_UsageUpdate($params) {
  
+}
+  
+function GetAdmin{int $clientid) {
+ 
+}
+
+function TryConnection(string $admin, string $pass, string $url) {
+ // Try the connection at least 5 times before erroring out.
+ for ($i = 0; $i <= 5; $i++) {
+  // If validation fails, try to Log back in.
+  if (Validate($admin, $pass, $url) == false) {
+   Login($admin, $pass, $url);
+  } else {
+   // If the validation succeeds, return true.
+   return(true);
+  }
+ }
+ // If within 5 attempts the login is still failing, return false.
+ return(false);
+}
+  
+
+function Validate(string $admin, string $pass, string $url) {
+ // It's easier to try a validation by pinging a single endpoint with low resource consumption.
+ try {
+  $response = $client->get($url . '/api/admin/' . $admin, [
+   'query' => [
+    'username' => $admin,
+    'password' => $pass,
+   ]
+  ]);
+ } catch (RequestException $e) {
+  die(Psr7\str($e->getRequest()));
+  if ($e->hasResponse()) {
+   die(Psr7\str($e->getResponse()));
+  }
+ }
+ 
+ $body = json_decode($response->getBody());
+ // If we get the hoped for response, return that the login is still valid.
+ if ($body['_success'] == 'true') {
+  return(true);
+ // However, if we get the expected error message for an expired cookie, return false. If the validation function runs the login function to re-validate again, we might get stuck in a loop.
+ } else if ($body['_success'] == 'false') && ($body['_msg'] == 'LOGIN REQUIRED') {
+  return(false);
+ } else {
+  die('Incorrect Response Format');
+ }
 }
 
 function Login(string $admin, string $pass, string $url) {
@@ -121,7 +170,9 @@ function Login(string $admin, string $pass, string $url) {
  if ($body['_success'] == 'true')
  {
   return(true);
- } else {
+ } else if ($body['_success'] == 'false') {
   return(false);
+ } else {
+  die('Incorrect Response Format');
  }
 }
