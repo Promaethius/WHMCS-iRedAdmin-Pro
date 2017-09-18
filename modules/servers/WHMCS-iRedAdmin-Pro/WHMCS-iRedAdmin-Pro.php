@@ -104,6 +104,15 @@ function WHMCS-iRedAdmin-Pro_UsageUpdate($params) {
 function GetAdmin{int $clientid) {
  
 }
+                  
+function GetClient(int $clientid) {
+ // Code to check for client in SQLite database.
+ return($mail);
+}
+                  
+function PutClient(int $clientid, string $mail) {
+ // Code to put client into SQLite database.
+}
 
 function TryConnection(string $admin, string $pass, string $url) {
  // Try the connection at least 5 times before erroring out.
