@@ -70,9 +70,9 @@ function WHMCS-iRedAdmin-Pro_SuspendAccount($params) {
    ]
   ]);
  } catch (RequestException $e) {
-  die(Psr7\str($e->getRequest()));
+  logModuleCall($param['moduletype'], 'SuspendAccount', Psr7\str($e->getRequest()), nil, nil, nil);
   if ($e->hasResponse()) {
-   die(Psr7\str($e->getResponse()));
+   logModuleCall($param['moduletype'], 'SuspendAccount', Psr7\str($e->getRequest()), Psr7\str($e->getResponse()), nil, nil);
   }
  }
 }
@@ -86,9 +86,9 @@ function WHMCS-iRedAdmin-Pro_UnsuspendAccount($params) {
    ]
   ]);
  } catch (RequestException $e) {
-  die(Psr7\str($e->getRequest()));
+  logModuleCall($param['moduletype'], 'UnsuspendAccount', Psr7\str($e->getRequest()), nil, nil, nil);
   if ($e->hasResponse()) {
-   die(Psr7\str($e->getResponse()));
+   logModuleCall($param['moduletype'], 'UnsuspendAccount', Psr7\str($e->getRequest()), Psr7\str($e->getResponse()), nil, nil);
   }
  }
 }
