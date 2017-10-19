@@ -1,5 +1,5 @@
 # WHMCS Plugin for iRedAdmin Pro
-Tested on WHMCS 7.2.3-release.1, PHP7, and iRedAdmin-Pro v2.8.0 (MySQL)
+Tested on WHMCS 7.3-release.1, PHP7, and iRedAdmin-Pro v2.8.0 (MySQL)
 
 ## Philosophy
 Being incredibly difficult to break into self-hosting markets, the goal of this plugin is to enable developers, small business owners, and freelancers to take advantage of the powerhouses that are WHMCS and iRedAdmin-Pro.
